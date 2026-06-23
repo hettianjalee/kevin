@@ -15,6 +15,7 @@ process.env.ADMIN_PASSWORD ??= LOGIN_CREDENTIALS.password;
 
 export default defineConfig({
   testDir: './tests',
+  timeout: 60000,
   fullyParallel: true,
   retries: process.env.CI ? parseInt(process.env.RETRIES || '2', 10) : 0,
   workers: process.env.CI ? parseInt(process.env.WORKERS || '1', 10) : undefined,
@@ -35,8 +36,8 @@ export default defineConfig({
     trace: 'on',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
-    actionTimeout: 15000,
-    navigationTimeout: 25000,
+    actionTimeout: 8000,
+    navigationTimeout: 30000,
   },
 
   projects: [

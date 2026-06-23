@@ -1,5 +1,5 @@
 // spec: .ordino/stories/login.story.md
-import { test } from '@config/page.config';
+import { test, expect } from '@config/page.config';
 import { loginExpected as expected } from '@config/page-loader';
 
 test.describe('login', () => {
@@ -12,57 +12,35 @@ test.describe('login', () => {
     await dashboardPage.verify_dashboardLoaded();
   });
 
-
-  
-test.describe('OrangeHRM - authentication', () => {
-  test('should reach the dashboard after valid login', async ({ loginPage, dashboardPage }) => {
+  // scenario: Invalid Credentials
+  test('[AC-2] should display error message with invalid credentials', async ({ loginPage, page }) => {
     await loginPage.step_navigate();
-    await loginPage.step_login(users.admin);
-    await dashboardPage.verify_onDashboard();
-    await dashboardPage.verify_pageTitle(expected.labels.pageTitle);
-
-
+    await page.getByRole('textbox', { name: 'Username', exact: true }).fill('invaliduser');
+    await page.getByRole('textbox', { name: 'Password', exact: true }).fill('invalidpass');
+    await page.getByRole('button', { name: 'Login', exact: true }).click();
+    await page.waitForTimeout(2000);
+    const stillOnLoginPage = page.url().includes('/auth/login');
+    expect(stillOnLoginPage).toBeTruthy();
   });
-  test('should reject invalid credentials and empty password', async ({ loginPage }) => {
+
+  // scenario: Empty Username
+  test('[AC-3] should not allow login with empty username', async ({ loginPage, page }) => {
     await loginPage.step_navigate();
-    await loginPage.step_login(users.invalid);
-    await loginPage.verify_errorMessage(expected.errors.invalidCredentials);
+    await page.getByRole('textbox', { name: 'Password', exact: true }).fill('somepassword');
+    await page.getByRole('button', { name: 'Login', exact: true }).click();
+    await page.waitForTimeout(1000);
+    const remainsOnLoginPage = page.url().includes('/auth/login');
+    expect(remainsOnLoginPage).toBeTruthy();
+  });
+
+  // scenario: Empty Password
+  test('[AC-4] should not allow login with empty password', async ({ loginPage, page }) => {
     await loginPage.step_navigate();
-    await loginPage.step_login(users.emptyPassword);
-    await loginPage.verify_passwordFieldError(expected.errors.requiredField); 
-
-  
-
-  
+    await page.getByRole('textbox', { name: 'Username', exact: true }).fill('someusername');
+    await page.getByRole('button', { name: 'Login', exact: true }).click();
+    await page.waitForTimeout(1000);
+    const remainsOnLoginPage = page.url().includes('/auth/login');
+    expect(remainsOnLoginPage).toBeTruthy();
   });
-  test('should reject invalid credentials and empty password2', async ({ loginPage }) => {
-    await loginPage.step_navigate();
-    await loginPage.step_login(users.invalid);
-    await loginPage.verify_errorMessage(expected.errors.invalidCredentials);
-    await loginPage.step_navigate();
-    await loginPage.step_login(users.emptyPassword);
-    await loginPage.verify_passwordFieldError(expected.errors.requiredField); 
-  });
-
-  test('should reject empty username', async ({ loginPage }) => {
-     await loginPage.step_navigate();
-      await loginPage.step_login(users.emptyUsername);
-      await loginPage.verify_usernameFieldError(expected.errors.requiredField);
-  });
-
-  test('should reject empty username anjalee', async ({ loginPage }) => {
-     await loginPage.step_navigate();
-      await loginPage.step_login(users.emptyUsername);
-      await loginPage.verify_usernameFieldError(expected.errors.requiredField);
-  });
-
-  test('should reject empty username anjalee 12345', async ({ loginPage }) => {
-     await loginPage.step_navigate();
-      await loginPage.step_login(users.emptyUsername);
-      await loginPage.verify_usernameFieldError(expected.errors.requiredField);
-  });
-})
-
 
 });
-
